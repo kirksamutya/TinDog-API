@@ -31,8 +31,23 @@ class AuthController extends Controller
                 ->where('role', 'admin')
                 ->first();
 
-            // REVERTED to your original plain-text password check
-            if (!$admin || !($validated['password'] == $admin->password)) {
+            if (!$admin) {
+                return response()->json(['success' => false, 'message' => 'Invalid administrator credentials.'], 401);
+            }
+
+            // 1. Check if password matches Plain Text (Legacy Way - Migration)
+            if ($validated['password'] === $admin->password) {
+                // It matched plain text! Secure it immediately.
+                $admin->password = Hash::make($validated['password']);
+                $admin->save();
+            } 
+            // 2. Check if password matches the Hash (Secure Way)
+            // We check if it's a valid hash first to avoid "This password does not use the Bcrypt algorithm" error
+            elseif (password_get_info($admin->password)['algoName'] !== 'unknown' && Hash::check($validated['password'], $admin->password)) {
+                // Password is secure and correct
+            }
+            // 3. Password is wrong
+            else {
                 return response()->json(['success' => false, 'message' => 'Invalid administrator credentials.'], 401);
             }
 
@@ -42,11 +57,10 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'adminId' => $admin->id,
-                'token' => $token // Send the token
+                'token' => $token
             ]);
 
         } catch (\Exception $e) {
-            // This catch block is what's being triggered
             return response()->json(['success' => false, 'message' => 'A server error occurred: ' . $e->getMessage()], 500);
         }
     }
@@ -72,8 +86,23 @@ class AuthController extends Controller
                 ->where('role', 'user')
                 ->first();
 
-            // REVERTED to your original plain-text password check
-            if (!$user || !($validated['password'] == $user->password)) {
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'Invalid user credentials.'], 401);
+            }
+
+            // 1. Check if password matches Plain Text (Legacy Way - Migration)
+            if ($validated['password'] === $user->password) {
+                // It matched plain text! Secure it immediately.
+                $user->password = Hash::make($validated['password']);
+                $user->save();
+            } 
+            // 2. Check if password matches the Hash (Secure Way)
+            // We check if it's a valid hash first to avoid "This password does not use the Bcrypt algorithm" error
+            elseif (password_get_info($user->password)['algoName'] !== 'unknown' && Hash::check($validated['password'], $user->password)) {
+                // Password is secure and correct
+            }
+            // 3. Password is wrong
+            else {
                 return response()->json(['success' => false, 'message' => 'Invalid user credentials.'], 401);
             }
 
@@ -84,7 +113,7 @@ class AuthController extends Controller
                 'success' => true,
                 'userId' => $user->id,
                 'status' => $user->status,
-                'token' => $token // Send the token
+                'token' => $token
             ]);
 
         } catch (\Exception $e) {
@@ -94,7 +123,6 @@ class AuthController extends Controller
 
     /**
      * Handle a registration request for a new user.
-     * This uses your original bcrypt logic.
      */
     public function register(Request $request)
     {
@@ -110,7 +138,7 @@ class AuthController extends Controller
             'last_name' => $request->last_name,
             'display_name' => $request->first_name . ' ' . $request->last_name,
             'email' => $request->email,
-            'password' => bcrypt($request->password), // Using your original bcrypt
+            'password' => Hash::make($request->password), // Always hash new passwords
             'role' => 'user',
             'status' => 'active',
         ]);
