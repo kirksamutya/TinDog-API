@@ -28,4 +28,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index']);
     Route::post('/reports', [App\Http\Controllers\ReportController::class, 'store']); // Create Report
     Route::put('/reports/{id}', [App\Http\Controllers\ReportController::class, 'update']);
+
+    // Analytics
+    Route::get('/analytics/overview', [App\Http\Controllers\AnalyticsController::class, 'overview']);
+    Route::get('/analytics/recent-activity', [App\Http\Controllers\AnalyticsController::class, 'recentActivity']);
+    Route::get('/analytics/user-growth', [App\Http\Controllers\AnalyticsController::class, 'userGrowth']);
+    Route::get('/analytics/demographics', [App\Http\Controllers\AnalyticsController::class, 'demographics']);
+    Route::get('/analytics/engagement', [App\Http\Controllers\AnalyticsController::class, 'engagement']);
+    Route::get('/analytics/revenue', [App\Http\Controllers\AnalyticsController::class, 'revenue']);
+
+    // System Settings
+    Route::get('/settings', [App\Http\Controllers\SystemSettingController::class, 'index']);
+    Route::put('/settings', [App\Http\Controllers\SystemSettingController::class, 'update']);
 });
