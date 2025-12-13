@@ -27,6 +27,6 @@ class TypingEvent implements ShouldBroadcast
 
     public function broadcastAs()
     {
-        return 'typing';
+        return 'TypingEvent';
     }
 }

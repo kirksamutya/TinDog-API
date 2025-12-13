@@ -28,6 +28,6 @@ class MessageSeenEvent implements ShouldBroadcast
 
     public function broadcastAs()
     {
-        return 'message.seen';
+        return 'MessageSeenEvent';
     }
 }
